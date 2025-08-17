@@ -16,6 +16,9 @@ const courseRoutes = require("./routes/course");
 app.use("/api/auth", authRoutes);
 app.use("/api/courses", courseRoutes);
 
+const adminRoutes = require("./routes/admin");
+app.use("/api/admin", adminRoutes);
+
 
 // Connect MongoDB
 mongoose.connect(process.env.MONGO_URI)

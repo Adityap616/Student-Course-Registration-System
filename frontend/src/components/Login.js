@@ -12,12 +12,24 @@ function Login({ onLogin }) {
   const handleLogin = async (e) => {
     e.preventDefault();
     setError("");
+
     try {
-      const res = await axios.post("http://localhost:5000/api/auth/login", { email, password });
+      const res = await axios.post("http://localhost:5000/api/auth/login", {
+        email,
+        password,
+      });
+
       localStorage.setItem("token", res.data.token);
       localStorage.setItem("username", res.data.username);
-      if (onLogin) onLogin();   // notify App to update login state
-      navigate("/main");
+      localStorage.setItem("isAdmin", String(res.data.isAdmin));
+
+      if (onLogin) onLogin();
+
+      if (res.data.isAdmin === true) {
+        navigate("/admin");
+      } else {
+        navigate("/main");
+      }
     } catch (err) {
       setError(err.response?.data?.msg || "Login failed");
     }
@@ -27,14 +39,27 @@ function Login({ onLogin }) {
     <div className="auth-container">
       <h2>Login</h2>
       <form onSubmit={handleLogin}>
-        <input type="email" placeholder="Email" value={email} onChange={(e) => setEmail(e.target.value)} required />
-        <input type="password" placeholder="Password" value={password} onChange={(e) => setPassword(e.target.value)} required />
+        <input
+          type="email"
+          placeholder="Email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          required
+        />
+        <input
+          type="password"
+          placeholder="Password"
+          value={password}
+          onChange={(e) => setPassword(e.target.value)}
+          required
+        />
         <button type="submit">Login</button>
-        {error && <p style={{color: "red"}}>{error}</p>}
+        {error && <p style={{ color: "red" }}>{error}</p>}
       </form>
-      <p>Don't have an account? <Link to="/register">Register</Link></p>
+      <p>
+        Don't have an account? <Link to="/register">Register</Link>
+      </p>
     </div>
   );
 }
-
 export default Login;

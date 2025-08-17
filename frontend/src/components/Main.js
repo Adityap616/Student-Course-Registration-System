@@ -38,7 +38,19 @@ function Main() {
   const totalCredits = selectedCourses.reduce((acc, c) => acc + c.credits, 0);
 
   const handleSelect = (course) => {
-    if (registeredCourseIds.includes(course._id)) return;
+    const isRegistered = registeredCourseIds.includes(course._id);
+
+    // Check for timeslot conflict with registered courses
+    const registeredTimes = courses
+      .filter(c => registeredCourseIds.includes(c._id))
+      .map(c => c.timeslot);
+    const hasConflict = registeredTimes.includes(course.timeslot);
+
+    // Check prerequisites
+    const registeredSet = new Set(registeredCourseIds);
+    const missingPrereqs = (course.prerequisites || []).some(prereq => !registeredSet.has(prereq));
+
+    if (isRegistered || hasConflict || missingPrereqs) return;
 
     if (selectedCourses.find((c) => c._id === course._id)) {
       setSelectedCourses(selectedCourses.filter((c) => c._id !== course._id));
@@ -91,9 +103,7 @@ function Main() {
       <h2>Welcome, {username}!</h2>
       <button onClick={handleLogout}>Logout</button>
       {" "}
-      <button onClick={() => navigate("/my-courses")}>
-        Go to My Courses
-      </button>
+      <button onClick={() => navigate("/my-courses")}>Go to My Courses</button>
 
       <h3>Course Registration</h3>
       <p>Total Credits: {totalCredits} / 20</p>
@@ -111,17 +121,24 @@ function Main() {
         <tbody>
           {courses.map((course) => {
             const isRegistered = registeredCourseIds.includes(course._id);
+            const hasConflict = courses
+              .filter(c => registeredCourseIds.includes(c._id))
+              .some(c => c.timeslot === course.timeslot);
+            const missingPrereqs = (course.prerequisites || []).some(prereq => !registeredCourseIds.includes(prereq));
+
+            let bgColor = "white";
+            if (isRegistered) bgColor = "#d3ffd3";       // green
+            else if (hasConflict) bgColor = "#ffd3d3";   // red
+            else if (missingPrereqs) bgColor = "#fff0d3"; // orange
+
             return (
-              <tr
-                key={course._id}
-                style={{ backgroundColor: isRegistered ? "#d3ffd3" : "white" }}
-              >
+              <tr key={course._id} style={{ backgroundColor: bgColor }}>
                 <td>
                   <input
                     type="checkbox"
                     checked={selectedCourses.some((c) => c._id === course._id)}
                     onChange={() => handleSelect(course)}
-                    disabled={course.seats <= 0 || isRegistered}
+                    disabled={course.seats <= 0 || isRegistered || hasConflict || missingPrereqs}
                   />
                 </td>
                 <td>{course.name}</td>

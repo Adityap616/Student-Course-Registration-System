@@ -23,12 +23,10 @@ function Main() {
       return;
     }
 
-    // Fetch all courses
     api.get("/courses")
       .then(res => setCourses(res.data))
       .catch(() => alert("Failed to fetch courses"));
 
-    // Fetch registered courses
     api.get("/courses/my-courses")
       .then(res => {
         const ids = res.data.map(c => c._id);
@@ -40,7 +38,6 @@ function Main() {
   const totalCredits = selectedCourses.reduce((acc, c) => acc + c.credits, 0);
 
   const handleSelect = (course) => {
-    // Do not allow selection if already registered
     if (registeredCourseIds.includes(course._id)) return;
 
     if (selectedCourses.find((c) => c._id === course._id)) {
@@ -68,9 +65,8 @@ function Main() {
       courseIds: selectedCourses.map((c) => c._id)
     })
       .then((res) => {
-        setCourses(res.data.updatedCourses); // update seats
+        setCourses(res.data.updatedCourses);
         setSelectedCourses([]);
-        // Update registeredCourseIds
         const newIds = res.data.updatedCourses
           .filter(c => selectedCourses.some(s => s._id === c._id))
           .map(c => c._id);
@@ -94,6 +90,10 @@ function Main() {
     <div style={{ padding: "20px" }}>
       <h2>Welcome, {username}!</h2>
       <button onClick={handleLogout}>Logout</button>
+      {" "}
+      <button onClick={() => navigate("/my-courses")}>
+        Go to My Courses
+      </button>
 
       <h3>Course Registration</h3>
       <p>Total Credits: {totalCredits} / 20</p>

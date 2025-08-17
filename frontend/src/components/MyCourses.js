@@ -6,6 +6,7 @@ function MyCourses() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
   const [registeredCourses, setRegisteredCourses] = useState([]);
+  const [droppingId, setDroppingId] = useState(null);
 
   const api = axios.create({
     baseURL: "http://localhost:5000/api",
@@ -36,6 +37,23 @@ function MyCourses() {
     navigate("/main");
   };
 
+  const handleDrop = async (courseId) => {
+    const confirm = window.confirm("Are you sure you want to drop this course?");
+    if (!confirm) return;
+
+    try {
+      setDroppingId(courseId);
+      const res = await api.post("/courses/drop", { courseId });
+      // Server returns updated myCourses
+      setRegisteredCourses(res.data.myCourses);
+    } catch (err) {
+      const msg = err.response?.data?.msg || "Failed to drop the course";
+      alert(msg);
+    } finally {
+      setDroppingId(null);
+    }
+  };
+
   return (
     <div style={{ padding: "20px" }}>
       <h2>My Registered Courses</h2>
@@ -52,12 +70,13 @@ function MyCourses() {
       {registeredCourses.length === 0 ? (
         <p>You have not registered for any courses yet.</p>
       ) : (
-        <table border="1" cellPadding="10">
+        <table border="1" cellPadding="10" style={{ width: "100%", maxWidth: 800 }}>
           <thead>
             <tr>
               <th>Course</th>
               <th>Credits</th>
               <th>Timeslot</th>
+              <th>Action</th>
             </tr>
           </thead>
           <tbody>
@@ -66,6 +85,15 @@ function MyCourses() {
                 <td>{course.name}</td>
                 <td>{course.credits}</td>
                 <td>{course.timeslot}</td>
+                <td>
+                  <button
+                    onClick={() => handleDrop(course._id)}
+                    disabled={droppingId === course._id}
+                    style={{ padding: "6px 10px" }}
+                  >
+                    {droppingId === course._id ? "Dropping..." : "Drop"}
+                  </button>
+                </td>
               </tr>
             ))}
           </tbody>

@@ -10,8 +10,11 @@ app.use(cors());
 app.use(express.json());
 
 // After middleware section
-const authRoutes = require('./routes/auth');
-app.use('/api/auth', authRoutes);
+const authRoutes = require("./routes/auth");
+const courseRoutes = require("./routes/course");
+
+app.use("/api/auth", authRoutes);
+app.use("/api/courses", courseRoutes);
 
 
 // Connect MongoDB

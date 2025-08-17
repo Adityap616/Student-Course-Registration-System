@@ -3,6 +3,7 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import Login from "./components/Login";
 import Register from "./components/Register";
 import Main from "./components/Main";
+import MyCourses from "./components/MyCourses";
 
 function App() {
   const [isLoggedIn, setIsLoggedIn] = useState(!!localStorage.getItem("token"));
@@ -14,6 +15,7 @@ function App() {
         <Route path="/login" element={<Login onLogin={() => setIsLoggedIn(true)} />} />
         <Route path="/register" element={<Register />} />
         <Route path="/main" element={isLoggedIn ? <Main /> : <Navigate to="/login" />} />
+        <Route path="/my-courses" element={isLoggedIn ? <MyCourses /> : <Navigate to="/login" />} />
       </Routes>
     </Router>
   );
